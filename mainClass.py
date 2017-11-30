@@ -196,8 +196,8 @@ class mainClass:
 				self.generatePath(self.mcp200PerformanceDataPath)
 				outputTxtFile = self.mcp200PerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 				
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$1,$2,$6,$5\'} > ' + outputTxtFile
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$1,$2,$6,$5}\' > ' + outputTxtFile
+				subprocess.call(command, shell=True)
 				
 				return self.mcp200PerformanceDataPath
 			else:
@@ -209,8 +209,8 @@ class mainClass:
 				self.generatePath(self.mcp110PerformanceDataPath)
 				outputTxtFile = self.mcp110PerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$1,$2,$6,$5\'} > ' + outputTxtFile
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$1,$2,$6,$5}\' > ' + outputTxtFile
+				subprocess.call(command, shell=True)
 				
 				return self.mcp110PerformanceDataPath
 			else:
@@ -223,8 +223,8 @@ class mainClass:
 				self.generatePath(self.mcp50PerformanceDataPath)
 				outputTxtFile = self.mcp50PerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 				
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$1,$2,$7,$8\'} > ' + outputTxtFile
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$1,$2,$7,$8}\' > ' + outputTxtFile
+				subprocess.call(command, shell=True)
 				
 				return self.mcp50PerformanceDataPath
 			else:
@@ -239,14 +239,15 @@ class mainClass:
 				print "DEBUG:  "+ outputTxtFile
 				# command = 'tail -10000 ~/winlogs/108001068SW | grep -a "Heap.*CPU" | tail -100 | awk {\'print ' + unit + ',$3,$4,$9,$10\'} > ' + outputTxtFile
 				
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$3,$4,$9,$10\'} > ' + outputTxtFile
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$3,$4,$9,$10}\' > ' + outputTxtFile
+				#command = 'tail --version'
 				print "DEBUG: " +command
-				subprocess.call([command], shell=True)
+				subprocess.call(command, shell=True)
 					
 				return self.ivgPerformanceDataPath
 			else:
 				print "Not IVG.\n"
-			
+				
 			print "Successfully writing performance data of unit %s into .txt file.\n" %(unit)
 			
 		except:
@@ -352,8 +353,8 @@ class mainClass:
 		import sys
 		import os
 		import shutil
-		#import json
-		import MySQLdb
+		import json
+		
 		import subprocess
 		import urllib
 		import urllib2
@@ -405,6 +406,8 @@ class mainClass:
 				print "Starting to update Performance Data to the Database for Server: %s - Unit: %s" % (self.host_lower, unit)
 				
 				filePath = self.writePerformanceDataToTxtFile(unit, samples)
+				#print filePath #DEBUG Changed filePath
+				#filePathTest='/Users/Qualitest/winlogs/myplace/performance_data/IVG/'
 				self.converTxtFileToJsonFile(unit, filePath)
 				self.insertCpuMemPayload(unit, filePath)
 				self.consumeCpuMemRequest(self.host_lower, unit)
