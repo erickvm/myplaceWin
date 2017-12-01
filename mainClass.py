@@ -133,7 +133,7 @@ class mainClass:
 		import requests
 		# Generate a list of units which have CPU_MEM_REQUEST_ENABLE = TRUE   #TESTWIN
 		url = self.mainUrl + '/' + 'check_cpu_mem_request?server=%s' % (self.host_lower)
-		print url
+		#print url
 		response = json.load(urllib2.urlopen(url))	
 		print 'response:  %s'  % (response)
 		# response = checkCpuMemRequestUrlRequestResponse
@@ -196,8 +196,8 @@ class mainClass:
 				self.generatePath(self.mcp200PerformanceDataPath)
 				outputTxtFile = self.mcp200PerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 				
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$1,$2,$6,$5\'} > ' + outputTxtFile
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$1,$2,$6,$5}\' > ' + outputTxtFile
+				subprocess.call(command, shell=True)
 				
 				return self.mcp200PerformanceDataPath
 			else:
@@ -209,8 +209,8 @@ class mainClass:
 				self.generatePath(self.mcp110PerformanceDataPath)
 				outputTxtFile = self.mcp110PerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$1,$2,$6,$5\'} > ' + outputTxtFile
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Total CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$1,$2,$6,$5}\' > ' + outputTxtFile
+				subprocess.call(command, shell=True)
 				
 				return self.mcp110PerformanceDataPath
 			else:
@@ -223,8 +223,8 @@ class mainClass:
 				self.generatePath(self.mcp50PerformanceDataPath)
 				outputTxtFile = self.mcp50PerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 				
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$1,$2,$7,$8\'} > ' + outputTxtFile
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$1,$2,$7,$8}\' > ' + outputTxtFile
+				subprocess.call(command, shell=True)
 				
 				return self.mcp50PerformanceDataPath
 			else:
@@ -236,17 +236,18 @@ class mainClass:
 				self.generatePath(self.ivgPerformanceDataPath)
 				outputTxtFile = self.ivgPerformanceDataPath + '/' + 'PerformanceData' + '_' + unit + '.txt'
 				#DEBUG
-				print "DEBUG:  "+ outputTxtFile
+				
 				# command = 'tail -10000 ~/winlogs/108001068SW | grep -a "Heap.*CPU" | tail -100 | awk {\'print ' + unit + ',$3,$4,$9,$10\'} > ' + outputTxtFile
 				
-				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk {\'print ' + unit + ',$3,$4,$9,$10\'} > ' + outputTxtFile
-				print "DEBUG: " +command
-				subprocess.call([command], shell=True)
+				command = 'tail -' + line + ' ' + uaSWType + ' | grep -a "Heap.*CPU" | tail -' + str(samples) + ' | awk \'{print ' + unit + ',$3,$4,$9,$10}\' > ' + outputTxtFile
+				#command = 'tail --version'
+
+				subprocess.call(command, shell=True)
 					
 				return self.ivgPerformanceDataPath
 			else:
 				print "Not IVG.\n"
-			
+				
 			print "Successfully writing performance data of unit %s into .txt file.\n" %(unit)
 			
 		except:
@@ -274,6 +275,10 @@ class mainClass:
 			txtFileName = path + '/' + 'PerformanceData' + '_' + unit + '.txt'
 			jsonFileName = path + '/' + 'PerformanceData' + '_' + unit + '.json'
 			
+			#Clean unwanted data from performace data file (sed -i '/CPU\|Mem/!d' *.txt)
+			command = 'sed -i \"/CPU\|Mem/!d\" ' + txtFileName
+			subprocess.call(command, shell=True)
+			
 			txtFile = open(txtFileName, 'r')
 			jsonFile = open(jsonFileName, 'w')
 
@@ -287,7 +292,7 @@ class mainClass:
 			for line in txtFile.readlines():
 				line = str(line)
 				line = line.split(' ')
-				list_txt.append(line)
+				list_txt.append(line)		
 			
 			for row in list_txt:
 				ua 	 = row[0]
@@ -352,8 +357,8 @@ class mainClass:
 		import sys
 		import os
 		import shutil
-		#import json
-		import MySQLdb
+		import json
+		
 		import subprocess
 		import urllib
 		import urllib2
@@ -405,6 +410,7 @@ class mainClass:
 				print "Starting to update Performance Data to the Database for Server: %s - Unit: %s" % (self.host_lower, unit)
 				
 				filePath = self.writePerformanceDataToTxtFile(unit, samples)
+
 				self.converTxtFileToJsonFile(unit, filePath)
 				self.insertCpuMemPayload(unit, filePath)
 				self.consumeCpuMemRequest(self.host_lower, unit)
@@ -848,11 +854,9 @@ class mainClass:
 			self.unitsVersions()
 		
 		if self.runEvery(1):
-		#	with open("mainClassLog.txt", "a") as myfile:
-		#		myfile.write("\nRunning unitPerformanceDetails")
+			with open("mainClassLog.txt", "a") as myfile:
+				myfile.write("\nRunning unitPerformanceDetails")
 			self.unitPerformance()
-			print "Entering per"
-		#	# execfile(mainpath + perfFileName)
 		#if self.runEvery(1):
 		#	with open("mainClassLog.txt", "a") as myfile:
 		#		myfile.write("\nRunning Reset Report")
